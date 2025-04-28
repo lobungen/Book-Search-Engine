@@ -8,7 +8,7 @@ export const typeDefs = `
   }
 
   type Mutation {
-    createUser(input: UserInput!): Auth
+    addUser(input: UserInput!): Auth
     login(email: String!, password: String!): Auth
     addBook(input: BookInput!): Book
     removeBook(bookId: ID!): Book
