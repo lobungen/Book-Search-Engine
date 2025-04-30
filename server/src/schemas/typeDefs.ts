@@ -1,17 +1,13 @@
 export const typeDefs = `
   type Query {
-    users: [User]
-    user(username: String!): User
-    books: [Book]!
-    book(bookId: ID!): Book
     me: User
   }
 
   type Mutation {
     addUser(input: UserInput!): Auth
     login(email: String!, password: String!): Auth
-    addBook(input: BookInput!): Book
-    removeBook(bookId: ID!): Book
+    addBook(input: BookInput!): User
+    removeBook(bookId: ID!): User
   }
 
   type User {
