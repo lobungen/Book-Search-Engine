@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Container, Card, Button, Row, Col } from 'react-bootstrap';
 
-import { getMe, deleteBook } from '../utils/API';
+import { getMe } from '../utils/API';
 import Auth from '../utils/auth';
-import { removeBookId } from '../utils/localStorage';
+// import { removeBookId } from '../utils/localStorage';
 import type { User } from '../models/User';
+
+import { useMutation } from '@apollo/client';
+import { REMOVE_BOOK } from '../utils/mutations';
 
 const SavedBooks = () => {
   const [userData, setUserData] = useState<User>({
@@ -13,6 +16,8 @@ const SavedBooks = () => {
     password: '',
     savedBooks: [],
   });
+  const [removeBook] = useMutation(REMOVE_BOOK);
+  
 
   // use this to determine if `useEffect()` hook needs to run again
   const userDataLength = Object.keys(userData).length;
@@ -27,13 +32,12 @@ const SavedBooks = () => {
         }
 
         const response = await getMe(token);
-
-        if (!response.ok) {
+        const data = await response.json();
+        if (!data) {
           throw new Error('something went wrong!');
         }
 
-        const user = await response.json();
-        setUserData(user);
+        setUserData(data);
       } catch (err) {
         console.error(err);
       }
@@ -42,8 +46,8 @@ const SavedBooks = () => {
     getUserData();
   }, [userDataLength]);
 
-  // create function that accepts the book's mongo _id value as param and deletes the book from the database
-  const handleDeleteBook = async (bookId: string) => {
+  // create function that accepts the book's mongo _id value as param and removes the book from the database
+  const handleRemoveBook = async (bookId: string) => {
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
     if (!token) {
@@ -51,16 +55,26 @@ const SavedBooks = () => {
     }
 
     try {
-      const response = await deleteBook(bookId, token);
+      await removeBook({
+        variables: { bookId },
+        context: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      });
 
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
+      // const updatedUser = await getMe(token);
+      // if (!updatedUser) {
+      //   throw new Error('something went wrong!');
+      // }
 
-      const updatedUser = await response.json();
-      setUserData(updatedUser);
+      setUserData((prevData) => ({
+        ...prevData,
+        savedBooks: prevData.savedBooks.filter((book) => book.bookId !== bookId),
+      })
+      );
       // upon success, remove book's id from localStorage
-      removeBookId(bookId);
     } catch (err) {
       console.error(err);
     }
@@ -108,9 +122,9 @@ const SavedBooks = () => {
                     <Card.Text>{book.description}</Card.Text>
                     <Button
                       className='btn-block btn-danger'
-                      onClick={() => handleDeleteBook(book.bookId)}
+                      onClick={() => handleRemoveBook(book.bookId)}
                     >
-                      Delete this Book!
+                      Remove this Book!
                     </Button>
                   </Card.Body>
                 </Card>
