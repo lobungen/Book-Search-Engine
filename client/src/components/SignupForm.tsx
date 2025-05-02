@@ -25,16 +25,18 @@ const SignupForm = ({ handleModalClose }: { handleModalClose: () => void }) => {
     event.preventDefault();
 
     // check if form has everything (as per react-bootstrap docs)
-    // const form = event.currentTarget as HTMLFormElement;
-    // if (!form.checkValidity()) {
-    //   event.preventDefault();
-    //   event.stopPropagation();
-    // }
+    const form = event.currentTarget as HTMLFormElement;
+    if (!form.checkValidity()) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
 
 
     try {
       const { data } = await addUser({
-        variables: { ...userFormData }
+        variables: {
+          input: { ...userFormData }
+        }
       });
       console.log(data);
 

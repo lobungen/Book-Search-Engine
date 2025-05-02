@@ -27,13 +27,13 @@ const SearchBooks = () => {
   // create state to hold save bookId values
   const [saveBookIds, setSaveBookIds] = useState(getSavedBookIds());
 
-  const [saveBook] = useMutation(ADD_BOOK);
+  const [addBook] = useMutation(ADD_BOOK);
 
   // set up useEffect hook to save `saveBookIds` list to localStorage on component unmount
   // learn more here: https://reactjs.org/docs/hooks-effect.html#effects-with-cleanup
-  useEffect(() => {
-    saveBookIds(saveBookIds);
-  }, [saveBookIds]);
+  // useEffect(() => {
+  //   return () => saveBookIds(saveBookIds);
+  // });
 
   // create method to search for books and set state on form submit
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -79,17 +79,12 @@ const SearchBooks = () => {
     if (!token) {
       return false;
     }
+    console.log('bookToSave', bookToSave);
 
     try {
-      await saveBook({
+      await addBook({
         variables: {
-          input: {
-            bookId: bookToSave.bookId,
-            authors: bookToSave.authors,
-            description: bookToSave.description,
-            title: bookToSave.title,
-            image: bookToSave.image,
-          },
+          input: { ...bookToSave },
         },
       });
 

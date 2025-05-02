@@ -21,8 +21,12 @@ interface BookArgs {
 
 interface AddBookArgs {
   input: {
-    bookText: string;
-    bookAuthor: string;
+    bookId: string;
+    authors: [string];
+    description: string;
+    title: string;
+    image: string;
+    link: string;
   }
 }
 
